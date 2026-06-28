@@ -1,0 +1,156 @@
+.dashboard-page {
+  padding: 1rem 0;
+}
+
+.dashboard-page h1 {
+  margin: 0 0 0.3rem;
+}
+
+.dashboard-subtitle {
+  color: #666;
+  margin: 0 0 1.5rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.2rem;
+  background: white;
+}
+
+.stat-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin: 0;
+  color: #131921;
+}
+
+.dashboard-links {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.dash-link {
+  padding: 0.7rem 1.5rem;
+  background: #232f3e;
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.dash-link:hover {
+  background: #131921;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.data-table th,
+.data-table td {
+  text-align: left;
+  padding: 0.7rem;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+}
+
+.data-table th {
+  background: #f8f8f8;
+  font-weight: 600;
+}
+
+.table-thumb {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  background: #f8f8f8;
+  border-radius: 4px;
+}
+
+.btn-primary {
+  padding: 0.6rem 1.5rem;
+  background: #febd69;
+  border: none;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  color: #111;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #f3a847;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-sm {
+  padding: 0.3rem 0.8rem;
+  background: #232f3e;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.btn-sm:hover {
+  background: #131921;
+}
+
+/* Dashboard specific */
+.dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.dash-header h1 {
+  margin: 0;
+}
+
+.product-form {
+  max-width: 600px;
+}
+
+.product-form .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+}
+
+.assign-form {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.assign-form h2 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+}
