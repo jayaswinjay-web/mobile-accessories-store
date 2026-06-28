@@ -16,7 +16,9 @@ export default function Login() {
     setLoading(true);
     try {
       const user = await loginUser(email, password);
-      navigate(getDashboardPath(user.role));
+      const role = user.role;
+      const path = role === 'super_admin' ? '/admin' : role === 'seller' ? '/seller' : role === 'delivery_person' ? '/delivery' : '/';
+      navigate(path);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -24,50 +26,29 @@ export default function Login() {
     }
   }
 
-  function getDashboardPath(role: string): string {
-    switch (role) {
-      case 'super_admin': return '/admin';
-      case 'seller': return '/seller';
-      case 'delivery_person': return '/delivery';
-      default: return '/';
-    }
-  }
-
   return (
-    <div className="auth-container">
+    <div className="auth-page">
       <div className="auth-card">
-        <h1>Sign In</h1>
-        <p className="auth-subtitle">Welcome back to MobileZone</p>
+        <div className="auth-card-header">
+          <h1>Sign In</h1>
+          <p>Welcome back to MobileZone</p>
+        </div>
         {error && <div className="auth-error">{error}</div>}
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className="auth-field">
             <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              placeholder="your@email.com"
-            />
+            <input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@example.com" />
           </div>
-          <div className="form-group">
+          <div className="auth-field">
             <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              placeholder="Enter your password"
-            />
+            <input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Enter password" />
           </div>
           <button type="submit" className="btn-auth" disabled={loading}>
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
-        <p className="auth-link">
-          Don't have an account? <Link to="/register">Register here</Link>
+        <p className="auth-footer-text">
+          Don't have an account? <Link to="/register">Create one</Link>
         </p>
       </div>
     </div>

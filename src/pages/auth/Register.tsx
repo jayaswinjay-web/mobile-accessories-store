@@ -22,7 +22,6 @@ export default function Register() {
       setError('Passwords do not match');
       return;
     }
-
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
@@ -31,7 +30,8 @@ export default function Register() {
     setLoading(true);
     try {
       await registerUser(email, password, displayName, role);
-      navigate(role === 'user' ? '/' : `/${role === 'super_admin' ? 'admin' : role}`);
+      const path = role === 'super_admin' ? '/admin' : role === 'seller' ? '/seller' : role === 'delivery_person' ? '/delivery' : '/';
+      navigate(path);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -40,69 +40,43 @@ export default function Register() {
   }
 
   return (
-    <div className="auth-container">
+    <div className="auth-page">
       <div className="auth-card">
-        <h1>Create Account</h1>
-        <p className="auth-subtitle">Join MobileZone today</p>
+        <div className="auth-card-header">
+          <h1>Create Account</h1>
+          <p>Join MobileZone today</p>
+        </div>
         {error && <div className="auth-error">{error}</div>}
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
+          <div className="auth-field">
             <label htmlFor="name">Full Name</label>
-            <input
-              id="name"
-              type="text"
-              value={displayName}
-              onChange={e => setDisplayName(e.target.value)}
-              required
-              placeholder="John Doe"
-            />
+            <input id="name" type="text" value={displayName} onChange={e => setDisplayName(e.target.value)} required placeholder="John Doe" />
           </div>
-          <div className="form-group">
+          <div className="auth-field">
             <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              placeholder="your@email.com"
-            />
+            <input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@example.com" />
           </div>
-          <div className="form-group">
+          <div className="auth-field">
             <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              placeholder="Min 6 characters"
-            />
+            <input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="Min 6 characters" />
           </div>
-          <div className="form-group">
+          <div className="auth-field">
             <label htmlFor="confirm">Confirm Password</label>
-            <input
-              id="confirm"
-              type="password"
-              value={confirmPassword}
-              onChange={e => setConfirmPassword(e.target.value)}
-              required
-              placeholder="Re-enter password"
-            />
+            <input id="confirm" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required placeholder="Re-enter password" />
           </div>
-          <div className="form-group">
-            <label htmlFor="role">Register as</label>
+          <div className="auth-field">
+            <label htmlFor="role">I want to</label>
             <select id="role" value={role} onChange={e => setRole(e.target.value as UserRole)}>
-              <option value="user">Customer</option>
-              <option value="seller">Seller</option>
-              <option value="delivery_person">Delivery Person</option>
+              <option value="user">Buy Products (Customer)</option>
+              <option value="seller">Sell Products (Seller)</option>
+              <option value="delivery_person">Deliver Products (Delivery Partner)</option>
             </select>
           </div>
           <button type="submit" className="btn-auth" disabled={loading}>
             {loading ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
-        <p className="auth-link">
+        <p className="auth-footer-text">
           Already have an account? <Link to="/login">Sign in</Link>
         </p>
       </div>

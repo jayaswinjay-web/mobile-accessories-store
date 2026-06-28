@@ -5,12 +5,19 @@ import { useCart } from '../../contexts/CartContext';
 import { createOrder } from '../../services/firestore';
 import './Checkout.css';
 
+const PAYMENT_OPTIONS = [
+  { value: 'cod', label: 'Cash on Delivery', desc: 'Pay when your order is delivered' },
+  { value: 'card', label: 'Credit / Debit Card', desc: 'Visa, Mastercard, Rupay' },
+  { value: 'upi', label: 'UPI', desc: 'Google Pay, PhonePe, Paytm' },
+];
+
 export default function Checkout() {
   const { items, totalAmount, clearCart } = useCart();
   const { userData } = useAuth();
   const navigate = useNavigate();
   const [address, setAddress] = useState(userData?.address || '');
   const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -19,14 +26,15 @@ export default function Checkout() {
     return null;
   }
 
-  async function handleSubmit(e: FormEvent) {
+  const deliveryCharge = totalAmount > 499 ? 0 : 49;
+  const finalAmount = totalAmount + deliveryCharge;
+
+  async function handlePlaceOrder(e: FormEvent) {
     e.preventDefault();
-    if (!userData) return;
-    if (!address.trim()) {
+    if (!userData || !address.trim()) {
       setError('Please enter a shipping address');
       return;
     }
-
     setLoading(true);
     setError('');
     try {
@@ -41,7 +49,7 @@ export default function Checkout() {
           image: i.image,
           sellerId: i.sellerId,
         })),
-        totalAmount,
+        totalAmount: finalAmount,
         status: 'pending',
         shippingAddress: address,
         paymentMethod,
@@ -50,8 +58,7 @@ export default function Checkout() {
         updatedAt: Date.now(),
       });
       clearCart();
-      alert('Order placed successfully!');
-      navigate('/orders');
+      navigate('/orders?placed=true');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -60,69 +67,120 @@ export default function Checkout() {
   }
 
   return (
-    <div className="checkout-page">
-      <h1>Checkout</h1>
-      {error && <div className="auth-error">{error}</div>}
-      <div className="checkout-layout">
-        <form onSubmit={handleSubmit} className="checkout-form">
-          <h2>Shipping Address</h2>
-          <div className="form-group">
-            <textarea
-              value={address}
-              onChange={e => setAddress(e.target.value)}
-              placeholder="Enter your full shipping address"
-              rows={4}
-              required
-            />
-          </div>
+    <div className="checkout container">
+      <h1 className="checkout-title">Checkout</h1>
 
-          <h2>Payment Method</h2>
-          <div className="payment-options">
-            <label className="payment-option">
-              <input
-                type="radio"
-                value="cod"
-                checked={paymentMethod === 'cod'}
-                onChange={e => setPaymentMethod(e.target.value)}
-              />
-              Cash on Delivery
-            </label>
-            <label className="payment-option">
-              <input
-                type="radio"
-                value="card"
-                checked={paymentMethod === 'card'}
-                onChange={e => setPaymentMethod(e.target.value)}
-              />
-              Credit/Debit Card
-            </label>
-            <label className="payment-option">
-              <input
-                type="radio"
-                value="upi"
-                checked={paymentMethod === 'upi'}
-                onChange={e => setPaymentMethod(e.target.value)}
-              />
-              UPI
-            </label>
-          </div>
+      <div className="checkout-progress">
+        <div className={`progress-step ${step >= 1 ? 'active' : ''}`}>
+          <span className="step-number">1</span>
+          <span className="step-label">Address</span>
+        </div>
+        <div className="progress-line" />
+        <div className={`progress-step ${step >= 2 ? 'active' : ''}`}>
+          <span className="step-number">2</span>
+          <span className="step-label">Payment</span>
+        </div>
+        <div className="progress-line" />
+        <div className={`progress-step ${step >= 3 ? 'active' : ''}`}>
+          <span className="step-number">3</span>
+          <span className="step-label">Review</span>
+        </div>
+      </div>
 
-          <button type="submit" className="btn-place-order" disabled={loading}>
-            {loading ? 'Processing...' : `Place Order - ₹${totalAmount.toLocaleString()}`}
-          </button>
-        </form>
+      <div className="checkout-grid">
+        <div className="checkout-main">
+          {error && <div className="checkout-error">{error}</div>}
 
-        <div className="checkout-summary">
-          <h2>Order Summary</h2>
-          {items.map(item => (
-            <div key={item.productId} className="checkout-item">
-              <span>{item.name} x {item.quantity}</span>
-              <span>&#8377;{(item.price * item.quantity).toLocaleString()}</span>
+          {step === 1 && (
+            <div className="checkout-section">
+              <h2>Shipping Address</h2>
+              <div className="form-group">
+                <textarea
+                  value={address}
+                  onChange={e => setAddress(e.target.value)}
+                  placeholder="Enter your full shipping address"
+                  rows={4}
+                  required
+                />
+              </div>
+              <button onClick={() => setStep(2)} className="btn-primary">Continue</button>
             </div>
-          ))}
-          <div className="checkout-total">
-            <span>Total:</span>
-            <span>&#8377;{totalAmount.toLocaleString()}</span>
+          )}
+
+          {step === 2 && (
+            <div className="checkout-section">
+              <h2>Payment Method</h2>
+              <div className="payment-grid">
+                {PAYMENT_OPTIONS.map(opt => (
+                  <label key={opt.value} className={`payment-card ${paymentMethod === opt.value ? 'selected' : ''}`}>
+                    <input
+                      type="radio"
+                      value={opt.value}
+                      checked={paymentMethod === opt.value}
+                      onChange={e => setPaymentMethod(e.target.value)}
+                    />
+                    <div className="payment-card-content">
+                      <strong>{opt.label}</strong>
+                      <p>{opt.desc}</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              <div className="checkout-nav">
+                <button onClick={() => setStep(1)} className="btn-secondary">Back</button>
+                <button onClick={() => setStep(3)} className="btn-primary">Continue</button>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="checkout-section">
+              <h2>Review Your Order</h2>
+              <div className="review-address">
+                <strong>Shipping to:</strong>
+                <p>{address}</p>
+                <button onClick={() => setStep(1)} className="link-btn">Change</button>
+              </div>
+              <div className="review-payment">
+                <strong>Payment:</strong>
+                <p>{PAYMENT_OPTIONS.find(o => o.value === paymentMethod)?.label}</p>
+                <button onClick={() => setStep(2)} className="link-btn">Change</button>
+              </div>
+              <div className="review-items">
+                <strong>Items ({items.length}):</strong>
+                {items.map((item, i) => (
+                  <div key={i} className="review-item">
+                    <span>{item.name} x {item.quantity}</span>
+                    <span>&#8377;{(item.price * item.quantity).toLocaleString()}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="checkout-nav">
+                <button onClick={() => setStep(2)} className="btn-secondary">Back</button>
+                <button onClick={handlePlaceOrder} className="btn-primary" disabled={loading}>
+                  {loading ? 'Processing...' : `Place Order - &#8377;${finalAmount.toLocaleString()}`}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="checkout-sidebar">
+          <div className="checkout-summary-card">
+            <h3>Order Summary</h3>
+            <div className="summary-row">
+              <span>Items ({items.length})</span>
+              <span>&#8377;{totalAmount.toLocaleString()}</span>
+            </div>
+            <div className="summary-row">
+              <span>Delivery</span>
+              <span>{deliveryCharge === 0 ? <span className="free">FREE</span> : `&#8377;${deliveryCharge}`}</span>
+            </div>
+            <hr />
+            <div className="summary-row total">
+              <span>Total</span>
+              <span>&#8377;{finalAmount.toLocaleString()}</span>
+            </div>
           </div>
         </div>
       </div>
